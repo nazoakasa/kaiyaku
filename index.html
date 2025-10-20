@@ -137,13 +137,14 @@
             <button class="stay-btn" id="stayBtn" onclick="stayWithUs()">やっぱり続ける</button>
             <button class="cancel-btn" id="cancelBtn" onclick="nextStep()">解約する</button>
         </div>
-        <div class="progress" id="progress">ステップ 1/20</div>
+        <div class="progress" id="progress">ステップ 1/21</div>
     </div>
 
     <script>
         let step = 1;
         let dodgeCount = 0;
         let clickCount = 0;
+        let escapeCount = 0;
         const steps = [
             { emoji: '😊', title: '解約手続き', message: '本当に解約してもよろしいですか?', trick: 'swap' },
             { emoji: '😢', title: 'お待ちください！', message: 'これまで一緒に過ごした時間を思い出してください...', trick: 'shrink' },
@@ -183,6 +184,7 @@
             document.querySelectorAll('.fake-btn').forEach(btn => btn.remove());
             dodgeCount = 0;
             clickCount = 0;
+            escapeCount = 0;
         }
 
         function applyTrick(trick) {
@@ -212,6 +214,41 @@
                     cancelBtn.style.opacity = '0.05';
                     cancelBtn.onmouseenter = () => cancelBtn.style.opacity = '0.2';
                     cancelBtn.onmouseleave = () => cancelBtn.style.opacity = '0.05';
+                    break;
+                
+                case 'clickEscape':
+                    // クリックしようとすると3回逃げて、3回目で入れ替わる
+                    cancelBtn.onmousedown = (e) => {
+                        if (escapeCount < 2) {
+                            e.preventDefault();
+                            const x = (escapeCount + 1) * 150 * (Math.random() > 0.5 ? 1 : -1);
+                            const y = (escapeCount + 1) * 80 * (Math.random() > 0.5 ? 1 : -1);
+                            cancelBtn.style.transform = `translate(${x}px, ${y}px)`;
+                            cancelBtn.style.position = 'absolute';
+                            escapeCount++;
+                            
+                            // エフェクト
+                            cancelBtn.style.transition = 'transform 0.2s ease-out';
+                            setTimeout(() => {
+                                cancelBtn.style.transition = 'all 0.3s';
+                            }, 200);
+                            
+                            return false;
+                        } else if (escapeCount === 2) {
+                            // 3回目：ボタンを入れ替える！
+                            e.preventDefault();
+                            container.style.flexDirection = container.style.flexDirection === 'row-reverse' ? 'row' : 'row-reverse';
+                            cancelBtn.style.transform = '';
+                            cancelBtn.style.position = 'relative';
+                            cancelBtn.style.background = '#ff0000';
+                            cancelBtn.textContent = '解約する（本物）';
+                            stayBtn.style.background = '#ff4757';
+                            stayBtn.textContent = 'これは解約ボタン';
+                            escapeCount++;
+                            return false;
+                        }
+                    };
+                    cancelBtn.style.cursor = 'pointer';
                     break;
                 
                 case 'doubleSwap':
@@ -385,7 +422,7 @@
         }
 
         function nextStep() {
-            if (step >= 20) {
+            if (step >= 21) {
                 clearTricks();
                 document.getElementById('emoji').textContent = '😭';
                 document.getElementById('title').textContent = '解約完了...';
@@ -411,7 +448,7 @@
             applyTrick(currentStep.trick);
 
             step++;
-            document.getElementById('progress').textContent = `ステップ ${step}/20`;
+            document.getElementById('progress').textContent = `ステップ ${step}/21`;
         }
 
         function stayWithUs() {
