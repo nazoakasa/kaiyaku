@@ -18,7 +18,6 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            overflow: hidden;
         }
         .container {
             background: white;
@@ -29,6 +28,8 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             text-align: center;
             position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         h1 {
             color: #333;
@@ -95,6 +96,46 @@
             color: #333;
             animation: pulse 1s infinite;
         }
+        .people-list {
+            background: #ffe5e5;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+            border: 2px solid #ff4757;
+        }
+        .people-list h3 {
+            color: #ff4757;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 20px;
+        }
+        .person-item {
+            padding: 10px;
+            margin: 8px 0;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .person-emoji {
+            font-size: 24px;
+        }
+        .person-info {
+            flex: 1;
+        }
+        .person-name {
+            font-weight: bold;
+            color: #333;
+            font-size: 16px;
+        }
+        .person-reward {
+            color: #ff4757;
+            font-size: 14px;
+            margin-top: 3px;
+        }
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -137,7 +178,7 @@
             <button class="stay-btn" id="stayBtn" onclick="stayWithUs()">やっぱり続ける</button>
             <button class="cancel-btn" id="cancelBtn" onclick="nextStep()">解約する</button>
         </div>
-        <div class="progress" id="progress">ステップ 1/21</div>
+        <div class="progress" id="progress">ステップ 1/22</div>
     </div>
 
     <script>
@@ -152,6 +193,7 @@
             { emoji: '😭', title: 'まだ早いです！', message: '私たちのサービスには、まだ使っていない機能がたくさんあります！', trick: 'hide' },
             { emoji: '😈', title: '最凶トラップ', message: 'クリックできるかな...？', trick: 'clickEscape' },
             { emoji: '💎', title: '限定特典進呈', message: 'プレミアム会員に無料アップグレードいたします！', discount: 'プレミアム無料', trick: 'doubleSwap' },
+            { emoji: '👨‍👩‍👧‍👦', title: '周りの人のことも...', message: 'あなたが解約すると、関係者全員の報酬がなくなります...', showPeople: true, trick: 'tiny' },
             { emoji: '🥺', title: 'お願いします...', message: 'あなたがいなくなったら、私たちはとても寂しいです...', trick: 'tiny' },
             { emoji: '💰', title: '最終オファー！', message: '3ヶ月間完全無料でご利用いただけます！', discount: '3ヶ月無料', trick: 'dodge' },
             { emoji: '🆘', title: '緊急事態！', message: 'あなたのアカウントには大切なデータが保存されています。本当に削除しますか？', trick: 'shake' },
@@ -217,7 +259,6 @@
                     break;
                 
                 case 'clickEscape':
-                    // クリックしようとすると3回逃げて、3回目で入れ替わる
                     cancelBtn.onmousedown = (e) => {
                         if (escapeCount < 2) {
                             e.preventDefault();
@@ -227,7 +268,6 @@
                             cancelBtn.style.position = 'absolute';
                             escapeCount++;
                             
-                            // エフェクト
                             cancelBtn.style.transition = 'transform 0.2s ease-out';
                             setTimeout(() => {
                                 cancelBtn.style.transition = 'all 0.3s';
@@ -235,7 +275,6 @@
                             
                             return false;
                         } else if (escapeCount === 2) {
-                            // 3回目：ボタンを入れ替える！
                             e.preventDefault();
                             container.style.flexDirection = container.style.flexDirection === 'row-reverse' ? 'row' : 'row-reverse';
                             cancelBtn.style.transform = '';
@@ -378,7 +417,6 @@
                     break;
                 
                 case 'chaos':
-                    // 偽ボタンは5個に減らす
                     for (let i = 0; i < 5; i++) {
                         const fake = document.createElement('button');
                         fake.className = 'fake-btn';
@@ -396,7 +434,6 @@
                     break;
                 
                 case 'ultimate':
-                    // 最終形態：3回避けてから捕まえる
                     cancelBtn.onmousemove = (e) => {
                         if (dodgeCount < 3) {
                             const x = Math.random() * 400 - 200;
@@ -405,7 +442,6 @@
                             cancelBtn.style.position = 'absolute';
                             dodgeCount++;
                         } else {
-                            // 3回避けたら捕まえやすくする
                             cancelBtn.style.padding = '10px 20px';
                             cancelBtn.style.fontSize = '14px';
                             cancelBtn.style.opacity = '1';
@@ -422,13 +458,13 @@
         }
 
         function nextStep() {
-            if (step >= 21) {
+            if (step >= 22) {
                 clearTricks();
                 document.getElementById('emoji').textContent = '😭';
                 document.getElementById('title').textContent = '解約完了...';
                 document.getElementById('message').textContent = 'よくここまで辿り着きました...本当にお疲れ様でした...';
                 document.getElementById('extra-content').innerHTML = '';
-                container.style.display = 'none';
+                document.querySelector('.btn-container').style.display = 'none';
                 document.getElementById('progress').textContent = '解約処理完了';
                 return;
             }
@@ -441,6 +477,46 @@
             if (currentStep.discount) {
                 document.getElementById('extra-content').innerHTML = 
                     `<div class="discount">${currentStep.discount}</div>`;
+            } else if (currentStep.showPeople) {
+                document.getElementById('extra-content').innerHTML = 
+                    `<div class="people-list">
+                        <h3>💔 影響を受ける人たち</h3>
+                        <div class="person-item">
+                            <span class="person-emoji">👨‍💼</span>
+                            <div class="person-info">
+                                <div class="person-name">担当カスタマーサポート 田中さん</div>
+                                <div class="person-reward">月額報酬 ¥15,000 が消失します</div>
+                            </div>
+                        </div>
+                        <div class="person-item">
+                            <span class="person-emoji">👩‍💻</span>
+                            <div class="person-info">
+                                <div class="person-name">開発チームリーダー 佐藤さん</div>
+                                <div class="person-reward">ボーナス ¥8,000 が消失します</div>
+                            </div>
+                        </div>
+                        <div class="person-item">
+                            <span class="person-emoji">👨‍👩‍👧</span>
+                            <div class="person-info">
+                                <div class="person-name">営業担当 鈴木さん（家族3人を養っています）</div>
+                                <div class="person-reward">インセンティブ ¥12,000 が消失します</div>
+                            </div>
+                        </div>
+                        <div class="person-item">
+                            <span class="person-emoji">🧑‍🎓</span>
+                            <div class="person-info">
+                                <div class="person-name">新人研修生 山田くん（22歳）</div>
+                                <div class="person-reward">研修報酬 ¥5,000 が消失します</div>
+                            </div>
+                        </div>
+                        <div class="person-item">
+                            <span class="person-emoji">👴</span>
+                            <div class="person-info">
+                                <div class="person-name">パートタイマー 高橋さん（65歳・年金生活）</div>
+                                <div class="person-reward">副収入 ¥7,000 が消失します</div>
+                            </div>
+                        </div>
+                    </div>`;
             } else {
                 document.getElementById('extra-content').innerHTML = '';
             }
@@ -448,7 +524,7 @@
             applyTrick(currentStep.trick);
 
             step++;
-            document.getElementById('progress').textContent = `ステップ ${step}/21`;
+            document.getElementById('progress').textContent = `ステップ ${step}/22`;
         }
 
         function stayWithUs() {
